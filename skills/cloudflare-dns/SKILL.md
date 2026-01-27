@@ -24,10 +24,16 @@ cloudflare-cli init --token YOUR_CLOUDFLARE_API_TOKEN
 
 ```bash
 # Add single record
-cloudflare-cli add <domain> <target> [type] [--proxied true|false]
+cloudflare-cli add <domain> <target> [type] [--proxied true|false] [--ttl seconds] [--priority number]
 
 # Batch processing (JSON, YAML, TOML, JSONL, JSON5)
 cloudflare-cli batch <file>
+
+# List records
+cloudflare-cli list <domain> [type]
+
+# Delete records
+cloudflare-cli delete <domain> <content> [type]
 
 # Purge cache (entire zone)
 cloudflare-cli purge <domain>
@@ -45,3 +51,5 @@ cloudflare-cli init
 |------|---------|--------|
 | A, AAAA, CNAME | Yes (default) | Protects origin IP |
 | MX, TXT, SRV, NS | No (auto) | Needs direct access |
+
+**Important**: Custom TTL values automatically disable proxy, since Cloudflare forces proxied records to use TTL "Auto" (1 second). If you specify `--ttl` with a value > 1, proxy will be auto-disabled unless you explicitly set `--proxied true` (which will trigger a warning).
