@@ -1,5 +1,5 @@
 {
-    "name": "cloudflare-dns",
+    "name": "cloudflare",
     "description": "Manage Cloudflare DNS records with zero dependencies. Supports batch processing (JSON, YAML, TOML, JSONL, JSON5) and smart proxy defaults.",
     "version": "1.0.0",
     "author": {
