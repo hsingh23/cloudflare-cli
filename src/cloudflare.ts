@@ -127,4 +127,13 @@ export class CloudflareClient {
             body: JSON.stringify(record),
         });
     }
+
+    async purgeCache(zoneId: string, options?: { purge_everything?: boolean; files?: string[]; tags?: string[]; hosts?: string[] }) {
+        const body = options || { purge_everything: true };
+        console.log(`Purging cache for zone ${zoneId}...`);
+        return this.fetchAPI(`/zones/${zoneId}/purge_cache`, {
+            method: 'POST',
+            body: JSON.stringify(body),
+        });
+    }
 }
