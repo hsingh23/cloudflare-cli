@@ -129,6 +129,10 @@ Commands:
   add <domain> <target> [type]   Add or update a DNS record
     --proxied <true|false>       Enable/disable Cloudflare proxy
 
+  list <domain> [type]           List DNS records for a domain
+
+  delete <domain> <content> [type]  Delete a DNS record
+
   batch <file>                   Process batch records (JSON, YAML, TOML, JSONL, JSON5)
 
   purge <domain>                 Purge entire cache for a domain
@@ -200,6 +204,56 @@ async function main() {
                 }
                 console.log(`Batch Item: ${rec.name} (${type})`);
                 await upsertRecord(client, rec.name, rec.content, type, proxied, rec.priority, rec.ttl);
+            }
+            break;
+        }
+        case 'list': {
+            const domain = args[1];
+            const type = args[2]?.toUpperCase();
+            if (!domain) {
+                console.error('Usage: cloudflare-cli list <domain> [type]');
+                process.exit(1);
+            }
+
+            const client = getClient();
+            const zoneId = await client.getZoneId(domain);
+            const records = await client.getDNSRecords(zoneId, domain, type);
+
+            if (records.length === 0) {
+                console.log('No records found.');
+            } else {
+                console.log(`Found ${records.length} record(s):\n`);
+                for (const r of records) {
+                    console.log(`  ${r.type.padEnd(6)} ${r.name}`);
+                    console.log(`         -> ${r.content}`);
+                    if (r.priority !== undefined) console.log(`         priority: ${r.priority}`);
+                    console.log(`         TTL: ${r.ttl}, proxied: ${r.proxied}, id: ${r.id}\n`);
+                }
+            }
+            break;
+        }
+        case 'delete': {
+            const domain = args[1];
+            const content = args[2];
+            const type = args[3]?.toUpperCase();
+            if (!domain || !content) {
+                console.error('Usage: cloudflare-cli delete <domain> <content> [type]');
+                process.exit(1);
+            }
+
+            const client = getClient();
+            const zoneId = await client.getZoneId(domain);
+            const records = await client.getDNSRecords(zoneId, domain, type);
+            const toDelete = records.filter(r => r.content === content);
+
+            if (toDelete.length === 0) {
+                console.log(`No matching record found with content: ${content}`);
+            } else {
+                for (const r of toDelete) {
+                    console.log(`Deleting ${r.type} ${r.name} -> ${r.content}...`);
+                    await client.deleteDNSRecord(zoneId, r.id);
+                    console.log('Deleted.');
+                }
             }
             break;
         }
