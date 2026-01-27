@@ -8,7 +8,7 @@ A zero-dependency CLI for managing Cloudflare DNS records. **Just needs Bun.**
 - 📦 **Multi-format batch support** - JSON, YAML, TOML, JSONL, JSON5
 - 💾 **Local token storage** - no env var needed after setup
 - ⚡ **Smart proxy defaults** - auto-disables for MX/TXT/SRV/NS
-- 🤖 **Claude Code plugin** - works as a skill/command in Claude Code
+- 🤖 **Claude Code plugin** - works as a skill/command
 
 ## Installation
 
@@ -23,32 +23,21 @@ bun link
 
 ### As a Claude Code plugin
 
-Add this to your project or home directory:
-
 ```bash
-# Option 1: Clone into your project
-git clone https://github.com/hsingh23/cloudflare-cli.git .claude-plugins/cloudflare-cli
+# Test the plugin
+claude --plugin-dir /path/to/cloudflare-cli
 
-# Option 2: Clone globally
-git clone https://github.com/hsingh23/cloudflare-cli.git ~/.claude-plugins/cloudflare-cli
+# Or install globally for all projects
+claude /install-plugin https://github.com/hsingh23/cloudflare-cli.git
 ```
 
-Then symlink the `.claude` folder to your project:
-```bash
-ln -s ~/.claude-plugins/cloudflare-cli/.claude .claude
-```
-
-Or copy the skill/command files directly:
-```bash
-mkdir -p .claude/skills .claude/commands
-cp ~/.claude-plugins/cloudflare-cli/.claude/skills/* .claude/skills/
-cp ~/.claude-plugins/cloudflare-cli/.claude/commands/* .claude/commands/
-```
+Once installed, use:
+- **Skill**: Auto-activates when discussing DNS/Cloudflare
+- **Command**: `/cloudflare-dns:add <domain> <target> [type]`
 
 ## Setup
 
 ```bash
-# Save token locally (recommended)
 cloudflare-cli init --token your_cloudflare_api_token
 ```
 
@@ -59,15 +48,9 @@ cloudflare-cli init --token your_cloudflare_api_token
 cloudflare-cli add blog.example.com hashnode.network CNAME
 cloudflare-cli add example.com 1.2.3.4 A
 
-# Batch processing (any format)
+# Batch processing
 cloudflare-cli batch records.yaml
 ```
-
-## Claude Code Commands
-
-Once installed as a plugin:
-- **Skill**: Auto-activates when discussing DNS/Cloudflare
-- **Command**: Use `/cloudflare-dns` to manage records
 
 ## Proxy Behavior
 
@@ -75,6 +58,22 @@ Once installed as a plugin:
 |------|---------|--------|
 | A, AAAA, CNAME | Proxied | Protects origin |
 | MX, TXT, SRV, NS | Not proxied | Needs direct access |
+
+## Plugin Structure
+
+```
+cloudflare-cli/
+├── .claude-plugin/
+│   └── plugin.json       # Plugin manifest
+├── skills/
+│   └── cloudflare-dns/
+│       └── SKILL.md      # Auto-invoked skill
+├── commands/
+│   └── cloudflare-dns/
+│       └── add.md        # /cloudflare-dns:add command
+└── src/
+    └── cli.ts            # CLI implementation
+```
 
 ## License
 
