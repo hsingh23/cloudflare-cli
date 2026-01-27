@@ -82,11 +82,11 @@ async function upsertRecord(client: CloudflareClient, domain: string, content: s
     const recordData: any = { type, name: domain, content, ttl, proxied, priority };
 
     if (targetRecord) {
-        if (allowMultiple && targetRecord.content === content && targetRecord.priority === priority) {
+        if (allowMultiple && targetRecord.content === content && targetRecord.priority === priority && targetRecord.ttl === ttl) {
             console.log(`Record match found, skipping: ${domain} ${type}`);
             return;
         }
-        if (!allowMultiple) {
+        if (!allowMultiple || (allowMultiple && targetRecord.content === content)) {
             console.log(`Updating existing record ${domain} (${type})...`);
             await client.updateDNSRecord(zoneId, targetRecord.id, recordData);
             console.log('Updated.');
@@ -128,6 +128,8 @@ Commands:
 
   add <domain> <target> [type]   Add or update a DNS record
     --proxied <true|false>       Enable/disable Cloudflare proxy
+    --ttl <seconds>              TTL in seconds (default: 1 = auto)
+    --priority <number>          Priority for MX records
 
   list <domain> [type]           List DNS records for a domain
 
@@ -181,8 +183,11 @@ async function main() {
                 console.log(`Auto-disabling proxy for ${type} record.`);
             }
 
-            console.log(`Processing ${domain} -> ${target} (${type}, proxied: ${isProxied})...`);
-            await upsertRecord(client, domain, target, type, isProxied);
+            const ttl = parseInt(getFlag('ttl') || '1', 10);
+            const priority = getFlag('priority') ? parseInt(getFlag('priority')!, 10) : undefined;
+
+            console.log(`Processing ${domain} -> ${target} (${type}, proxied: ${isProxied}, ttl: ${ttl})...`);
+            await upsertRecord(client, domain, target, type, isProxied, priority, ttl);
             break;
         }
         case 'batch': {
