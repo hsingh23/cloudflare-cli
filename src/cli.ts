@@ -82,7 +82,7 @@ async function upsertRecord(client: CloudflareClient, domain: string, content: s
     const recordData: any = { type, name: domain, content, ttl, proxied, priority };
 
     if (targetRecord) {
-        if (allowMultiple && targetRecord.content === content && targetRecord.priority === priority && targetRecord.ttl === ttl) {
+        if (allowMultiple && targetRecord.content === content && targetRecord.priority === priority && targetRecord.ttl === ttl && targetRecord.proxied === proxied) {
             console.log(`Record match found, skipping: ${domain} ${type}`);
             return;
         }
