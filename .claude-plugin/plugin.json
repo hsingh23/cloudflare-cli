@@ -6,5 +6,14 @@
         "name": "hsingh23"
     },
     "repository": "https://github.com/hsingh23/cloudflare-cli",
-    "license": "MIT"
+    "homepage": "https://github.com/hsingh23/cloudflare-cli",
+    "license": "MIT",
+    "keywords": [
+        "cloudflare",
+        "dns",
+        "infrastructure",
+        "devops",
+        "cli"
+    ],
+    "category": "infrastructure"
 }

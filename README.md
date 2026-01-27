@@ -23,12 +23,22 @@ bun link
 
 ### As a Claude Code plugin
 
+**From Marketplace (recommended):**
 ```bash
-# Test the plugin
-claude --plugin-dir /path/to/cloudflare-cli
+# Add the marketplace
+/plugin marketplace add github:hsingh23/cloudflare-cli
 
-# Or install globally for all projects
-claude /install-plugin https://github.com/hsingh23/cloudflare-cli.git
+# Install the plugin
+/plugin install cloudflare@hsingh23-tools
+```
+
+**Direct installation:**
+```bash
+# Install directly from GitHub
+/install-plugin https://github.com/hsingh23/cloudflare-cli.git
+
+# Or test locally
+claude --plugin-dir /path/to/cloudflare-cli
 ```
 
 Once installed, use:
