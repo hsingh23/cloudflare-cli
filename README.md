@@ -8,15 +8,41 @@ A zero-dependency CLI for managing Cloudflare DNS records. **Just needs Bun.**
 - 📦 **Multi-format batch support** - JSON, YAML, TOML, JSONL, JSON5
 - 💾 **Local token storage** - no env var needed after setup
 - ⚡ **Smart proxy defaults** - auto-disables for MX/TXT/SRV/NS
+- 🤖 **Claude Code plugin** - works as a skill/command in Claude Code
 
 ## Installation
 
+### As a CLI tool
+
 ```bash
-# Clone and install
 git clone https://github.com/hsingh23/cloudflare-cli.git
 cd cloudflare-cli
 bun install
 bun link
+```
+
+### As a Claude Code plugin
+
+Add this to your project or home directory:
+
+```bash
+# Option 1: Clone into your project
+git clone https://github.com/hsingh23/cloudflare-cli.git .claude-plugins/cloudflare-cli
+
+# Option 2: Clone globally
+git clone https://github.com/hsingh23/cloudflare-cli.git ~/.claude-plugins/cloudflare-cli
+```
+
+Then symlink the `.claude` folder to your project:
+```bash
+ln -s ~/.claude-plugins/cloudflare-cli/.claude .claude
+```
+
+Or copy the skill/command files directly:
+```bash
+mkdir -p .claude/skills .claude/commands
+cp ~/.claude-plugins/cloudflare-cli/.claude/skills/* .claude/skills/
+cp ~/.claude-plugins/cloudflare-cli/.claude/commands/* .claude/commands/
 ```
 
 ## Setup
@@ -35,9 +61,13 @@ cloudflare-cli add example.com 1.2.3.4 A
 
 # Batch processing (any format)
 cloudflare-cli batch records.yaml
-cloudflare-cli batch records.toml
-cloudflare-cli batch records.json5
 ```
+
+## Claude Code Commands
+
+Once installed as a plugin:
+- **Skill**: Auto-activates when discussing DNS/Cloudflare
+- **Command**: Use `/cloudflare-dns` to manage records
 
 ## Proxy Behavior
 
@@ -45,8 +75,6 @@ cloudflare-cli batch records.json5
 |------|---------|--------|
 | A, AAAA, CNAME | Proxied | Protects origin |
 | MX, TXT, SRV, NS | Not proxied | Needs direct access |
-
-Override with `--proxied true` or `--proxied false`.
 
 ## License
 
