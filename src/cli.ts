@@ -129,6 +129,7 @@ Commands:
   add <domain> <target> [type]   Add or update a DNS record
     --proxied <true|false>       Enable/disable Cloudflare proxy
     --ttl <seconds>              TTL in seconds (default: 1 = auto)
+                                 Note: Custom TTL auto-disables proxy
     --priority <number>          Priority for MX records
 
   list <domain> [type]           List DNS records for a domain
@@ -174,17 +175,31 @@ async function main() {
             }
 
             const client = getClient();
+            const ttl = parseInt(getFlag('ttl') || '1', 10);
+            const priority = getFlag('priority') ? parseInt(getFlag('priority')!, 10) : undefined;
+
             let isProxied = true;
             const proxiedFlag = getFlag('proxied');
-            if (proxiedFlag !== undefined) {
-                isProxied = proxiedFlag === 'true';
-            } else if (['MX', 'TXT', 'SRV', 'NS'].includes(type)) {
+
+            // Auto-disable proxy for record types that don't support it
+            if (['MX', 'TXT', 'SRV', 'NS'].includes(type)) {
                 isProxied = false;
                 console.log(`Auto-disabling proxy for ${type} record.`);
             }
+            // Auto-disable proxy when custom TTL is specified (proxied records force TTL to Auto/1)
+            else if (ttl > 1 && proxiedFlag === undefined) {
+                isProxied = false;
+                console.log(`Auto-disabling proxy because custom TTL (${ttl}) was specified.`);
+            }
+            // Explicit --proxied flag overrides auto-detection
+            else if (proxiedFlag !== undefined) {
+                isProxied = proxiedFlag === 'true';
+                if (isProxied && ttl > 1) {
+                    console.warn(`Warning: Proxied records cannot use custom TTL. Cloudflare will force TTL to Auto (1).`);
+                }
+            }
 
-            const ttl = parseInt(getFlag('ttl') || '1', 10);
-            const priority = getFlag('priority') ? parseInt(getFlag('priority')!, 10) : undefined;
+
 
             console.log(`Processing ${domain} -> ${target} (${type}, proxied: ${isProxied}, ttl: ${ttl})...`);
             await upsertRecord(client, domain, target, type, isProxied, priority, ttl);

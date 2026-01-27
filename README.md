@@ -56,7 +56,15 @@ cloudflare-cli init --token your_cloudflare_api_token
 ```bash
 # Add records
 cloudflare-cli add blog.example.com hashnode.network CNAME
-cloudflare-cli add example.com 1.2.3.4 A
+cloudflare-cli add example.com 1.2.3.4 A --ttl 3600
+cloudflare-cli add example.com mx1.example.com MX --priority 10 --ttl 14400
+
+# List records
+cloudflare-cli list example.com
+cloudflare-cli list example.com MX
+
+# Delete records
+cloudflare-cli delete example.com old-server.example.com A
 
 # Batch processing
 cloudflare-cli batch records.yaml
@@ -68,6 +76,8 @@ cloudflare-cli batch records.yaml
 |------|---------|--------|
 | A, AAAA, CNAME | Proxied | Protects origin |
 | MX, TXT, SRV, NS | Not proxied | Needs direct access |
+
+**Important**: Custom TTL values automatically disable proxy, since Cloudflare forces proxied records to use TTL "Auto" (1 second). If you specify `--ttl` with a value > 1, proxy will be auto-disabled unless you explicitly set `--proxied true` (which will trigger a warning).
 
 ## Plugin Structure
 
