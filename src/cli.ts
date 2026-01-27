@@ -131,6 +131,11 @@ Commands:
 
   batch <file>                   Process batch records (JSON, YAML, TOML, JSONL, JSON5)
 
+  purge <domain>                 Purge entire cache for a domain
+    --files <url1,url2,...>      Purge specific URLs only
+    --tags <tag1,tag2,...>       Purge by cache tags
+    --hosts <host1,host2,...>    Purge by hosts
+
 Options:
   -h, --help                     Show this help message
 `);
@@ -196,6 +201,32 @@ async function main() {
                 console.log(`Batch Item: ${rec.name} (${type})`);
                 await upsertRecord(client, rec.name, rec.content, type, proxied, rec.priority, rec.ttl);
             }
+            break;
+        }
+        case 'purge': {
+            const domain = args[1];
+            if (!domain) {
+                console.error('Usage: cloudflare-cli purge <domain>');
+                process.exit(1);
+            }
+
+            const client = getClient();
+            const zoneId = await client.getZoneId(domain);
+
+            const files = getFlag('files')?.split(',');
+            const tags = getFlag('tags')?.split(',');
+            const hosts = getFlag('hosts')?.split(',');
+
+            let options: any = undefined;
+            if (files || tags || hosts) {
+                options = {};
+                if (files) options.files = files;
+                if (tags) options.tags = tags;
+                if (hosts) options.hosts = hosts;
+            }
+
+            await client.purgeCache(zoneId, options);
+            console.log('Cache purged successfully.');
             break;
         }
         default:
