@@ -1,4 +1,5 @@
 ---
+name: dns-add
 description: Add or update Cloudflare DNS records
 ---
 
