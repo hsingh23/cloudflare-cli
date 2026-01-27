@@ -1,70 +1,50 @@
 # Cloudflare CLI
 
-A command-line tool for managing Cloudflare DNS records with local caching.
+A zero-dependency CLI for managing Cloudflare DNS records. **Just needs Bun.**
 
-## Requirements
+## Features
 
-- **Bun** (not Node.js) - [Install Bun](https://bun.sh)
+- 🚀 **Zero runtime dependencies** - uses only Bun's native APIs
+- 📦 **Multi-format batch support** - JSON, YAML, TOML, JSONL, JSON5
+- 💾 **Local token storage** - no env var needed after setup
+- ⚡ **Smart proxy defaults** - auto-disables for MX/TXT/SRV/NS
 
 ## Installation
 
 ```bash
-# Clone or download this repository
-cd cloudflare-cli-skill
-
-# Install dependencies
+# Clone and install
+git clone https://github.com/hsingh23/cloudflare-cli.git
+cd cloudflare-cli
 bun install
-
-# Link globally (recommended - uses source directly)
 bun link
-```
-
-### Optional: Build standalone binary
-If you need a standalone executable that works without Bun:
-```bash
-bun build --compile ./src/cli.ts --outfile bin/cloudflare-cli
 ```
 
 ## Setup
 
-### Option 1: Save token locally (recommended)
 ```bash
+# Save token locally (recommended)
 cloudflare-cli init --token your_cloudflare_api_token
-```
-This saves the token to `~/.config/cloudflare-cli/token` and caches your zones.
-
-### Option 2: Environment variable
-```bash
-export CLOUDFLARE_API_TOKEN=your_token_here
-cloudflare-cli init
 ```
 
 ## Usage
 
-### Add a single record
 ```bash
+# Add records
 cloudflare-cli add blog.example.com hashnode.network CNAME
 cloudflare-cli add example.com 1.2.3.4 A
-```
 
-### Batch processing
-Supports **JSON**, **YAML**, **TOML**, **JSONL**, and **JSON5** formats:
-
-```bash
+# Batch processing (any format)
 cloudflare-cli batch records.yaml
 cloudflare-cli batch records.toml
-cloudflare-cli batch records.jsonl
-```
-
-### Refresh zone cache
-```bash
-cloudflare-cli init
+cloudflare-cli batch records.json5
 ```
 
 ## Proxy Behavior
 
-- **A, AAAA, CNAME**: Proxied by default (orange cloud)
-- **MX, TXT, SRV, NS**: Auto-disabled (grey cloud)
+| Type | Default | Reason |
+|------|---------|--------|
+| A, AAAA, CNAME | Proxied | Protects origin |
+| MX, TXT, SRV, NS | Not proxied | Needs direct access |
 
 Override with `--proxied true` or `--proxied false`.
 
