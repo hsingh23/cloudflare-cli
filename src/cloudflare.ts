@@ -128,6 +128,13 @@ export class CloudflareClient {
         });
     }
 
+    async deleteDNSRecord(zoneId: string, recordId: string) {
+        console.log(`Deleting record ${recordId}...`);
+        return this.fetchAPI(`/zones/${zoneId}/dns_records/${recordId}`, {
+            method: 'DELETE',
+        });
+    }
+
     async purgeCache(zoneId: string, options?: { purge_everything?: boolean; files?: string[]; tags?: string[]; hosts?: string[] }) {
         const body = options || { purge_everything: true };
         console.log(`Purging cache for zone ${zoneId}...`);
