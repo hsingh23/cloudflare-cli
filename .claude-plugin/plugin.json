@@ -1,0 +1,10 @@
+{
+    "name": "cloudflare-dns",
+    "description": "Manage Cloudflare DNS records with zero dependencies. Supports batch processing (JSON, YAML, TOML, JSONL, JSON5) and smart proxy defaults.",
+    "version": "1.0.0",
+    "author": {
+        "name": "hsingh23"
+    },
+    "repository": "https://github.com/hsingh23/cloudflare-cli",
+    "license": "MIT"
+}
