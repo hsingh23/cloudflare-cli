@@ -1,0 +1,29 @@
+{
+    "name": "hsingh23-tools",
+    "owner": {
+        "name": "hsingh23",
+        "email": "github@hsingh23"
+    },
+    "metadata": {
+        "description": "Personal collection of Claude Code plugins for infrastructure and developer tools",
+        "version": "1.0.0"
+    },
+    "plugins": [
+        {
+            "name": "cloudflare",
+            "source": "./",
+            "description": "Manage Cloudflare DNS records with zero dependencies. Supports batch processing (JSON, YAML, TOML, JSONL, JSON5) and smart proxy defaults.",
+            "version": "1.0.0",
+            "author": {
+                "name": "hsingh23"
+            },
+            "category": "infrastructure",
+            "tags": [
+                "cloudflare",
+                "dns",
+                "infrastructure",
+                "devops"
+            ]
+        }
+    ]
+}
