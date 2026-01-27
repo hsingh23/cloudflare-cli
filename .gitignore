@@ -10,6 +10,9 @@ bin/
 # cloudflare cli cache
 .zones-cache.json
 
+# sensitive DNS configs
+hostinger-email.yaml
+
 # code coverage
 coverage
 *.lcov
