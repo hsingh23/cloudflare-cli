@@ -4,7 +4,11 @@ node_modules
 # output
 out
 dist
+bin/
 *.tgz
+
+# cloudflare cli cache
+.zones-cache.json
 
 # code coverage
 coverage

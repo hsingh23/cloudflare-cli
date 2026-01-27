@@ -15,8 +15,14 @@ cd cloudflare-cli-skill
 # Install dependencies
 bun install
 
-# Link globally
+# Link globally (recommended - uses source directly)
 bun link
+```
+
+### Optional: Build standalone binary
+If you need a standalone executable that works without Bun:
+```bash
+bun build --compile ./src/cli.ts --outfile bin/cloudflare-cli
 ```
 
 ## Setup
