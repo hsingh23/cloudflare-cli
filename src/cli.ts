@@ -143,6 +143,10 @@ Commands:
     --tags <tag1,tag2,...>       Purge by cache tags
     --hosts <host1,host2,...>    Purge by hosts
 
+  redirect <from> <to>           Create redirect rule (e.g., apex to www)
+    --status <301|302>           Status code (default: 301)
+    --no-preserve-path           Don't preserve path in redirect
+
 Options:
   -h, --help                     Show this help message
 `);
@@ -301,6 +305,25 @@ async function main() {
 
             await client.purgeCache(zoneId, options);
             console.log('Cache purged successfully.');
+            break;
+        }
+        case 'redirect': {
+            const from = args[1];
+            const to = args[2];
+            if (!from || !to) {
+                console.error('Usage: cloudflare-cli redirect <from-host> <to-host>');
+                console.error('Example: cloudflare-cli redirect example.com www.example.com');
+                process.exit(1);
+            }
+
+            const client = getClient();
+            const zoneId = await client.getZoneId(from);
+            const zoneName = from.split('.').slice(-2).join('.');
+            const statusCode = parseInt(getFlag('status') || '301', 10);
+            const preservePath = !hasFlag('no-preserve-path');
+
+            await client.createRedirectRule(zoneId, zoneName, from, to, preservePath, statusCode);
+            console.log(`Redirect rule created: ${from} -> ${to} (${statusCode})`);
             break;
         }
         default:

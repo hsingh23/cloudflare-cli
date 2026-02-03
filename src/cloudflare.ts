@@ -143,4 +143,94 @@ export class CloudflareClient {
             body: JSON.stringify(body),
         });
     }
+
+    async listRedirectRules(zoneId: string): Promise<any[]> {
+        try {
+            const data = await this.fetchAPI(`/zones/${zoneId}/rulesets/phases/http_request_dynamic_redirect/entrypoint`);
+            return data.result?.rules || [];
+        } catch (e: any) {
+            // If no ruleset exists yet, return empty
+            if (e.message?.includes('could not find a phase entry point ruleset')) {
+                return [];
+            }
+            throw e;
+        }
+    }
+
+    async createRedirectRule(zoneId: string, zoneName: string, fromHost: string, toHost: string, preservePath: boolean = true, statusCode: number = 301) {
+        console.log(`Creating redirect rule: ${fromHost} -> ${toHost}...`);
+
+        const ruleName = `Redirect ${fromHost} to ${toHost}`;
+
+        const newRule = {
+            action: 'redirect',
+            action_parameters: {
+                from_value: {
+                    status_code: statusCode,
+                    target_url: {
+                        expression: preservePath
+                            ? `concat("https://${toHost}", http.request.uri.path)`
+                            : `"https://${toHost}/"`,
+                    },
+                    preserve_query_string: true,
+                },
+            },
+            expression: `(http.host eq "${fromHost}")`,
+            description: ruleName,
+            enabled: true,
+        };
+
+        // Try to create a new ruleset first
+        try {
+            return await this.fetchAPI(`/zones/${zoneId}/rulesets`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: 'Dynamic Redirects',
+                    kind: 'zone',
+                    phase: 'http_request_dynamic_redirect',
+                    rules: [newRule],
+                }),
+            });
+        } catch (e: any) {
+            // If ruleset already exists, we need to update it
+            if (e.message?.includes('already exists') || e.message?.includes('A phase entrypoint')) {
+                console.log('Ruleset exists, fetching and updating...');
+
+                const data = await this.fetchAPI(`/zones/${zoneId}/rulesets/phases/http_request_dynamic_redirect/entrypoint`);
+                const existingRuleset = data.result;
+
+                // Check if rule already exists
+                const existingRule = existingRuleset.rules?.find((r: any) =>
+                    r.expression?.includes(`http.host eq "${fromHost}"`) ||
+                    r.description === ruleName
+                );
+
+                if (existingRule) {
+                    console.log(`Redirect rule already exists, updating...`);
+                    const updatedRules = existingRuleset.rules.map((r: any) =>
+                        r.id === existingRule.id ? { ...newRule, id: existingRule.id } : r
+                    );
+
+                    return this.fetchAPI(`/zones/${zoneId}/rulesets/${existingRuleset.id}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            ...existingRuleset,
+                            rules: updatedRules,
+                        }),
+                    });
+                } else {
+                    // Add new rule to existing ruleset
+                    return this.fetchAPI(`/zones/${zoneId}/rulesets/${existingRuleset.id}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            ...existingRuleset,
+                            rules: [...(existingRuleset.rules || []), newRule],
+                        }),
+                    });
+                }
+            }
+            throw e;
+        }
+    }
 }
+
